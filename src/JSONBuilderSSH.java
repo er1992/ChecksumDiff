@@ -1,10 +1,10 @@
 
-public class JSONBuilderSSH implements JSONBuilder {
+public class JSONBuilderSSH extends JSONBuilder {
 
-  Connection conn = null;
-  
   public JSONBuilderSSH(Connection conn) {
-    this.conn = conn;
+    super(conn);
+    // TODO Auto-generated constructor stub
   }
+  
   
 }

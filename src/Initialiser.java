@@ -1,6 +1,6 @@
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.List;
-
 import javax.swing.*;
 
 public class Initialiser {
@@ -22,9 +22,19 @@ public class Initialiser {
           switch(conn.type) {
             case SSH:
               JSONBuilderSSH sshBuilder = new JSONBuilderSSH(conn);
+            try {
+              System.out.println(sshBuilder.getJsonFromDirectory());
+            } catch (NoSuchAlgorithmException | IOException e) {
+              e.printStackTrace();
+            }
               break;
             case LOCAL:
               JSONBuilderLocal localBuilder = new JSONBuilderLocal(conn);
+            try {
+              System.out.println(localBuilder.getJsonFromDirectory());
+            } catch (NoSuchAlgorithmException | IOException e) {
+              e.printStackTrace();
+            }
               break;
             case JSON:
               break;
@@ -73,7 +83,7 @@ public class Initialiser {
     int result = JOptionPane.showConfirmDialog(null, myPanel, "Please Enter the values", JOptionPane.OK_CANCEL_OPTION);
     if (result == JOptionPane.OK_OPTION) {
       if (!typeField.getText().isEmpty()) {
-        conn.type = InputType.valueOf(typeField.getText());
+        conn.type = InputType.valueOf(typeField.getText().toUpperCase());
       } else {
         System.exit(-1);
       }
