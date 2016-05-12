@@ -1,7 +1,14 @@
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
 import javax.swing.*;
+
+import org.json.simple.JSONObject;
+
+import com.sun.javafx.geom.DirtyRegionContainer;
 
 public class Initialiser {
 
@@ -10,41 +17,52 @@ public class Initialiser {
   }
   
   public static void main(String[] args) {
-
+    
+    List<JSONObject> directoryJsons = new ArrayList<>();
+    
     // No arguments supplied then use prompt
     if (args.length == 0) {
-      if (promptJSON()) {
-        
-      } else {
-        
-        for (int i = 0 ; i < 2 ; i++) {
-          Connection conn = promptConnection();
-          switch(conn.type) {
-            case SSH:
-              JSONBuilderSSH sshBuilder = new JSONBuilderSSH(conn);
-            try {
-              System.out.println(sshBuilder.getJsonFromDirectory());
-            } catch (NoSuchAlgorithmException | IOException e) {
-              e.printStackTrace();
-            }
-              break;
-            case LOCAL:
-              JSONBuilderLocal localBuilder = new JSONBuilderLocal(conn);
-            try {
-              System.out.println(localBuilder.getJsonFromDirectory());
-            } catch (NoSuchAlgorithmException | IOException e) {
-              e.printStackTrace();
-            }
-              break;
-            case JSON:
-              break;
-            default:
-          }
-        }
-      }
+      directoryJsons = handleInput(args);
     } else {
-    System.out.println("User cancelled");
+      // TODO
+      // Create Connection object based on the details input from the Command Line
+      // Pass to builders accordingly
     }
+    
+    JSONDirectoryComparator comparator = new JSONDirectoryComparator(directoryJsons.get(0), directoryJsons.get(1));
+    JSONObject diff = comparator.compareDirectories();
+    System.out.println(diff.toString());
+    
+  }
+  
+  public static List<JSONObject> handleInput(String[] args) {
+    List<JSONObject> directoryJsons = new ArrayList<>();
+    
+    for (int i = 0 ; i < 2 ; i++) {
+      Connection conn = promptConnection();
+      
+      if (conn.type == InputType.SSH) {
+        JSONBuilderSSH sshBuilder = new JSONBuilderSSH(conn);
+        try {
+          directoryJsons.add(sshBuilder.getJsonFromDirectory());
+        } catch (NoSuchAlgorithmException | IOException e) {
+          // TODO
+          e.printStackTrace();
+        }
+      } else if (conn.type == InputType.LOCAL) {
+        JSONBuilderLocal localBuilder = new JSONBuilderLocal(conn);
+        try {
+          directoryJsons.add(localBuilder.getJsonFromDirectory());
+        } catch (NoSuchAlgorithmException | IOException e) {
+          // TODO
+          e.printStackTrace();
+        }
+      } else if (conn.type == InputType.JSON) {
+        // TODO
+      }
+      
+    }
+    return directoryJsons;
   }
   
   public static boolean promptJSON() {
