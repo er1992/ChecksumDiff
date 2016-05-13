@@ -1,4 +1,8 @@
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,61 +12,110 @@ import javax.swing.*;
 
 import org.json.simple.JSONObject;
 
-import com.sun.javafx.geom.DirtyRegionContainer;
-
 public class Initialiser {
-
+  
   public enum InputType {
     SSH, LOCAL, JSON
   }
   
   public static void main(String[] args) {
-    
+
+    List<Connection> connections = new ArrayList<>();
     List<JSONObject> directoryJsons = new ArrayList<>();
     
     // No arguments supplied then use prompt
     if (args.length == 0) {
-      directoryJsons = handleInput(args);
+      for (int i = 0 ; i < 2 ; i++) {
+        Connection conn = promptConnection();
+        connections.add(conn);
+        JSONObject dirJson = buildJSONFromConnection(conn);      
+        if (dirJson != null) {
+          directoryJsons.add(dirJson);
+        } else {
+          System.exit(-1);
+          // TODO proper error handling
+        }
+        try {
+          writeToJSONFile(dirJson, conn);
+        } catch (IOException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+      }
+
     } else {
       // TODO
       // Create Connection object based on the details input from the Command Line
       // Pass to builders accordingly
+      List<String> argsList = Arrays.asList(args);
+      
+      for (int i = 1; i < 3; i++) {
+        if ( !argsList.contains("-t" + i) || !argsList.contains("-u" + i) ) {
+          System.exit(-1);
+          // TODO proper error handling
+        } else {
+          Connection conn = new Connection();
+          conn.type = InputType.valueOf(argsList.get(argsList.indexOf("-t" + i) + 1).toUpperCase());
+          conn.url = argsList.get(argsList.indexOf("-u" + i) + 1);
+          connections.add(conn);
+          JSONObject dirJson = buildJSONFromConnection(conn);
+          directoryJsons.add(dirJson);
+          try {
+            writeToJSONFile(dirJson, conn);
+          } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+          
+        }
+      }
     }
     
-    JSONDirectoryComparator comparator = new JSONDirectoryComparator(directoryJsons.get(0), directoryJsons.get(1));
-    JSONObject diff = comparator.compareDirectories();
-    System.out.println(diff.toString());
+    if (connections.get(0).valid() && connections.get(1).valid()) {
+      JSONDirectoryComparator comparator = new JSONDirectoryComparator(directoryJsons.get(0), directoryJsons.get(1));
+      JSONObject diff = comparator.compareDirectories();
+      DirectoryBuilder dirBuilder = new DirectoryBuilder(connections.get(0));
+      
+      try {
+        dirBuilder.buildDirectoryFromJson(diff);
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
     
   }
-  
-  public static List<JSONObject> handleInput(String[] args) {
-    List<JSONObject> directoryJsons = new ArrayList<>();
-    
-    for (int i = 0 ; i < 2 ; i++) {
-      Connection conn = promptConnection();
-      
-      if (conn.type == InputType.SSH) {
-        JSONBuilderSSH sshBuilder = new JSONBuilderSSH(conn);
-        try {
-          directoryJsons.add(sshBuilder.getJsonFromDirectory());
-        } catch (NoSuchAlgorithmException | IOException e) {
-          // TODO
-          e.printStackTrace();
-        }
-      } else if (conn.type == InputType.LOCAL) {
-        JSONBuilderLocal localBuilder = new JSONBuilderLocal(conn);
-        try {
-          directoryJsons.add(localBuilder.getJsonFromDirectory());
-        } catch (NoSuchAlgorithmException | IOException e) {
-          // TODO
-          e.printStackTrace();
-        }
-      } else if (conn.type == InputType.JSON) {
+
+  private static void writeToJSONFile(JSONObject jsonObj, Connection conn) throws FileNotFoundException, UnsupportedEncodingException, IOException {
+    File file = new File(conn.url);
+    PrintWriter writer = new PrintWriter(file.getParentFile().getCanonicalPath() + "/" + file.getName() + ".json", "UTF-8");
+    writer.print(jsonObj);
+    writer.close();
+  }
+
+  private static JSONObject buildJSONFromConnection(Connection conn) {
+    JSONObject dirJson = null;
+    if (conn.type == InputType.SSH) {
+      JSONBuilderSSH sshBuilder = new JSONBuilderSSH(conn);
+      try {
+        dirJson = sshBuilder.getJsonFromDirectory();
+      } catch (NoSuchAlgorithmException | IOException e) {
         // TODO
+        e.printStackTrace();
       }
-      
+    } else if (conn.type == InputType.LOCAL) {
+      JSONBuilderLocal localBuilder = new JSONBuilderLocal(conn);
+      try {
+        dirJson = localBuilder.getJsonFromDirectory();
+      } catch (NoSuchAlgorithmException | IOException e) {
+        // TODO
+        e.printStackTrace();
+      }
+    } else if (conn.type == InputType.JSON) {
+      // TODO
     }
-    return directoryJsons;
+    
+    return dirJson;
   }
   
   public static boolean promptJSON() {

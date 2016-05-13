@@ -1,4 +1,3 @@
-import java.io.File;
 import java.util.Iterator;
 
 import org.json.simple.JSONObject;
@@ -24,7 +23,8 @@ public class JSONDirectoryComparator {
   @SuppressWarnings("unchecked")
   public JSONObject compareDirectoriesRecursive(JSONObject jsonNew, JSONObject jsonOld) {
     JSONObject diffJson = new JSONObject();
-    for(Iterator iterator = jsonNew.keySet().iterator(); iterator.hasNext();) {
+    for(@SuppressWarnings("rawtypes")
+    Iterator iterator = jsonNew.keySet().iterator(); iterator.hasNext();) {
       String key = (String) iterator.next();
       if (jsonNew.get(key) instanceof JSONObject) {
         JSONObject obj = (JSONObject) jsonNew.get(key);
@@ -40,8 +40,6 @@ public class JSONDirectoryComparator {
         } else {
           diffJson.put(key, obj);
         }
-        
-//        System.out.println(obj);
       } else {
         String newChecksum = (String) jsonNew.get(key);
         if (jsonOld.containsKey(key)) {
@@ -52,9 +50,7 @@ public class JSONDirectoryComparator {
           // TODO handle the deleted file cleanup if any
         }
         diffJson.put(key, newChecksum);
-        System.out.println(key);
       }
-//      System.out.println("end");
     }
     return diffJson;
   }

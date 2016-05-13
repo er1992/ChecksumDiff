@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Iterator;
 
 import org.json.simple.JSONObject;
 
@@ -26,16 +27,19 @@ public class DirectoryBuilder {
   }
   
   private void buildDirectoryFromJsonRecursive(JSONObject json, File readRoot, File writeRoot) throws IOException {
-    for (Object obj : json.entrySet()) {
-      if (obj instanceof JSONObject) {
-//        JSONObject folderObj = (JSONObject) obj;
-//        readRoot = new File(readRoot.getCanonicalPath() + "/" + folderObj)
-//        buildDirectoryFromJsonRecursive((JSONObject) obj, readRoot, writeRoot);
+    for(@SuppressWarnings("rawtypes")
+    Iterator iterator = json.keySet().iterator(); iterator.hasNext();) {
+      String key = (String) iterator.next();
+      if (json.get(key) instanceof JSONObject) {
+        File newReadRoot = new File(readRoot.getCanonicalPath() + "/" + key);
+        File newWriteRoot = new File(writeRoot.getCanonicalPath() + "/" + key);
+        if (!newWriteRoot.mkdir()) {
+          throw new IOException("Couldn't create " + key + " deploy directory");
+        }
+        buildDirectoryFromJsonRecursive((JSONObject) json.get(key), newReadRoot, newWriteRoot);
       } else {
-        String fileName = (String) obj.toString();
-        Files.copy(Paths.get(readRoot.getCanonicalFile() + "/" + fileName), Paths.get(writeRoot.getCanonicalFile() + "/" + fileName), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(Paths.get(readRoot.getCanonicalFile() + "/" + key), Paths.get(writeRoot.getCanonicalFile() + "/" + key), StandardCopyOption.REPLACE_EXISTING);
       }
-      
     }
   }
   

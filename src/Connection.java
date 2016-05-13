@@ -23,5 +23,18 @@ public class Connection {
     this.user = "root";
     this.type = Initialiser.InputType.SSH;
     this.port = 22;
+  }
+
+  public boolean valid() {
+    if (type == Initialiser.InputType.SSH) {
+      return (this.type != null && this.port != null && this.user != null && this.url != null && !this.url.isEmpty());
+    } else if (type == Initialiser.InputType.LOCAL) {
+      return (this.type != null && this.url != null && !this.url.isEmpty());
+    } else if (type == Initialiser.InputType.JSON) {
+      // TODO
+      return false;
+    } else {
+      return false;
+    }
   };
 }
