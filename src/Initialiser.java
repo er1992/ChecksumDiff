@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -16,6 +17,14 @@ import javax.swing.JTextField;
 
 
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 
 public class Initialiser {
@@ -33,22 +42,28 @@ public class Initialiser {
     if (args.length == 0) {
       for (int i = 0 ; i < 2 ; i++) {
         Connection conn = promptConnection();
-        connections.add(conn);
-        JSONObject dirJson = buildJSONFromConnection(conn);      
-        if (dirJson != null) {
-          directoryJsons.add(dirJson);
-        } else {
-          System.exit(-1);
-          // TODO proper error handling
-        }
         try {
-          writeToJSONFile(dirJson, conn);
+          buildJSON(connections, directoryJsons, conn);
+        } catch (JsonSyntaxException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        } catch (FileNotFoundException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
         } catch (IOException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        } catch (JsonIOException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        } catch (ParseException e) {
           // TODO Auto-generated catch block
           e.printStackTrace();
         }
       }
-
     } else {
       // TODO
       // Create Connection object based on the details input from the Command Line
@@ -64,15 +79,28 @@ public class Initialiser {
           conn.type = InputType.valueOf(argsList.get(argsList.indexOf("-t" + i) + 1).toUpperCase());
           conn.url = argsList.get(argsList.indexOf("-u" + i) + 1);
           connections.add(conn);
-          JSONObject dirJson = buildJSONFromConnection(conn);
-          directoryJsons.add(dirJson);
           try {
-            writeToJSONFile(dirJson, conn);
+            buildJSON(connections, directoryJsons, conn);
+          } catch (JsonSyntaxException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          } catch (UnsupportedEncodingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
           } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+          } catch (JsonIOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          } catch (ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
           }
-          
+
         }
       }
     }
@@ -92,14 +120,27 @@ public class Initialiser {
     
   }
 
+  private static void buildJSON(List<Connection> connections, List<JSONObject> directoryJsons, Connection conn) throws FileNotFoundException, UnsupportedEncodingException, IOException, JsonSyntaxException, JsonIOException, ParseException {
+    connections.add(conn);
+    JSONObject dirJson = buildJSONFromConnection(conn);      
+    if (dirJson != null) {
+      directoryJsons.add(dirJson);
+    } else {
+      throw new JsonSyntaxException("JSON file wasn't generated properly");
+    }
+    writeToJSONFile(dirJson, conn);
+  }
+
   private static void writeToJSONFile(JSONObject jsonObj, Connection conn) throws FileNotFoundException, UnsupportedEncodingException, IOException {
+    if (conn.type == InputType.JSON)
+      return;
     File file = new File(conn.url);
     PrintWriter writer = new PrintWriter(file.getParentFile().getCanonicalPath() + "/" + file.getName() + ".json", "UTF-8");
     writer.print(jsonObj);
     writer.close();
   }
 
-  private static JSONObject buildJSONFromConnection(Connection conn) {
+  private static JSONObject buildJSONFromConnection(Connection conn) throws JsonIOException, JsonSyntaxException, FileNotFoundException, ParseException {
     JSONObject dirJson = null;
     if (conn.type == InputType.SSH) {
       JSONBuilderSSH sshBuilder = new JSONBuilderSSH(conn);
@@ -118,7 +159,13 @@ public class Initialiser {
         e.printStackTrace();
       }
     } else if (conn.type == InputType.JSON) {
-      // TODO
+      JsonParser parser = new JsonParser();
+      
+      JsonElement jsonElement = parser.parse(new FileReader(conn.url));
+      JsonObject jsonObj = jsonElement.getAsJsonObject();
+      
+      JSONParser returnParser = new JSONParser();
+      dirJson = (JSONObject) returnParser.parse(jsonObj.toString());
     }
     
     return dirJson;

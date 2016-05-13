@@ -32,7 +32,7 @@ public class Connection {
       return (this.type != null && this.url != null && !this.url.isEmpty());
     } else if (type == Initialiser.InputType.JSON) {
       // TODO
-      return false;
+      return (this.type != null && this.url != null && !this.url.isEmpty());
     } else {
       return false;
     }
