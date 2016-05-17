@@ -106,10 +106,22 @@ public class Initialiser {
     }
     
     if (connections.get(0).valid() && connections.get(1).valid()) {
-      JSONDirectoryComparator comparator = new JSONDirectoryComparator(directoryJsons.get(0), directoryJsons.get(1));
-      JSONObject diff = comparator.compareDirectories();
-      DirectoryBuilder dirBuilder = new DirectoryBuilder(connections.get(0));
-      
+      JSONObject diff = null;
+      DirectoryBuilder dirBuilder = null;
+      if (connections.get(0).type == InputType.JSON || connections.get(1).type == InputType.JSON) {
+        if (connections.get(0).type == InputType.JSON && connections.get(1).type == InputType.JSON) {
+          JSONDirectoryComparator comparator = new JSONDirectoryComparator(directoryJsons.get(0), directoryJsons.get(1));
+          diff = comparator.compareDirectories();
+          dirBuilder = new DirectoryBuilder(promptJSONSource());
+        } else {
+          // TODO handle error properly. This shouldnt happen
+          System.exit(-1);
+        }
+      } else {
+        JSONDirectoryComparator comparator = new JSONDirectoryComparator(directoryJsons.get(0), directoryJsons.get(1));
+        diff = comparator.compareDirectories();
+        dirBuilder = new DirectoryBuilder(connections.get(0));
+      }
       try {
         dirBuilder.buildDirectoryFromJson(diff);
       } catch (IOException e) {
@@ -183,6 +195,10 @@ public class Initialiser {
     return InputType.valueOf(jsonQuestionSelected.toString());
   }
   
+  public static Connection promptJSONSource() {
+    return new Connection(JOptionPane.showInputDialog(null, "Enter the Source Folder to copy from"), null, null, null);
+  }
+  
   public static Connection promptConnection() {
     Connection conn = new Connection();
     
@@ -222,6 +238,9 @@ public class Initialiser {
       if (!portField.getText().isEmpty()) {
         conn.port = Integer.parseInt(portField.getText());
       }
+    } else {
+      // TODO Proper error handling
+      System.exit(-1);
     }
 
     return conn;
