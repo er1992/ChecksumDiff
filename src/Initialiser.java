@@ -108,16 +108,11 @@ public class Initialiser {
     if (connections.get(0).valid() && connections.get(1).valid()) {
       JSONObject diff = null;
       DirectoryBuilder dirBuilder = null;
-      if (connections.get(0).type == InputType.JSON || connections.get(1).type == InputType.JSON) {
-        if (connections.get(0).type == InputType.JSON && connections.get(1).type == InputType.JSON) {
-          JSONDirectoryComparator comparator = new JSONDirectoryComparator(directoryJsons.get(0), directoryJsons.get(1));
-          diff = comparator.compareDirectories();
-          dirBuilder = new DirectoryBuilder(promptJSONSource());
-        } else {
-          // TODO handle error properly. This shouldnt happen
-          System.exit(-1);
-        }
-      } else {
+      if (connections.get(0).type == InputType.JSON && connections.get(1).type == InputType.JSON) {
+        JSONDirectoryComparator comparator = new JSONDirectoryComparator(directoryJsons.get(0), directoryJsons.get(1));
+        diff = comparator.compareDirectories();
+        dirBuilder = new DirectoryBuilder(promptJSONSource());
+      } else if (connections.get(0).type == InputType.LOCAL && connections.get(1).type == InputType.JSON) {
         JSONDirectoryComparator comparator = new JSONDirectoryComparator(directoryJsons.get(0), directoryJsons.get(1));
         diff = comparator.compareDirectories();
         dirBuilder = new DirectoryBuilder(connections.get(0));
