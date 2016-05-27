@@ -15,7 +15,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-
+import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -29,6 +29,8 @@ import com.google.gson.JsonSyntaxException;
 
 public class Initialiser {
   
+  static Logger log = Logger.getLogger(Initialiser.class.getName());
+  
   public enum InputType {
     SSH, LOCAL, JSON
   }
@@ -40,9 +42,11 @@ public class Initialiser {
     
     // No arguments supplied then use prompt
     if (args.length == 0) {
+      log.info("Input from GUI");
       for (int i = 0 ; i < 2 ; i++) {
         Connection conn = promptConnection();
         try {
+          log.info("Building JSON from source");
           buildJSON(connections, directoryJsons, conn);
         } catch (JsonSyntaxException e) {
           // TODO Auto-generated catch block
@@ -65,6 +69,7 @@ public class Initialiser {
         }
       }
     } else {
+      log.info("Input from command line argument");
       // TODO
       // Create Connection object based on the details input from the Command Line
       // Pass to builders accordingly
@@ -80,6 +85,7 @@ public class Initialiser {
           conn.url = argsList.get(argsList.indexOf("-u" + i) + 1);
           connections.add(conn);
           try {
+            log.info("Building JSON from source");
             buildJSON(connections, directoryJsons, conn);
           } catch (JsonSyntaxException e) {
             // TODO Auto-generated catch block
@@ -106,18 +112,24 @@ public class Initialiser {
     }
     
     if (connections.get(0).valid() && connections.get(1).valid()) {
+      log.info("Connections Valid");
       JSONObject diff = null;
       DirectoryBuilder dirBuilder = null;
       if (connections.get(0).type == InputType.JSON && connections.get(1).type == InputType.JSON) {
+        log.info("JSON vs JSON");
         JSONDirectoryComparator comparator = new JSONDirectoryComparator(directoryJsons.get(0), directoryJsons.get(1));
         diff = comparator.compareDirectories();
+        log.info("Building JSON diff");
         dirBuilder = new DirectoryBuilder(promptJSONSource());
       } else if (connections.get(0).type == InputType.LOCAL && connections.get(1).type == InputType.JSON) {
+        log.info("LOCAL vs JSON");
         JSONDirectoryComparator comparator = new JSONDirectoryComparator(directoryJsons.get(0), directoryJsons.get(1));
         diff = comparator.compareDirectories();
+        log.info("Building JSON diff");
         dirBuilder = new DirectoryBuilder(connections.get(0));
       }
       try {
+        log.info("Building direcotry from JSON diff");
         dirBuilder.buildDirectoryFromJson(diff);
       } catch (IOException e) {
         // TODO Auto-generated catch block
