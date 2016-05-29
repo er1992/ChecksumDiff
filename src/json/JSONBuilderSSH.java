@@ -1,7 +1,10 @@
+package json;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
 import org.json.simple.JSONObject;
+
+import pojo.Connection;
 
 public class JSONBuilderSSH extends JSONBuilder {
 
@@ -11,6 +14,7 @@ public class JSONBuilderSSH extends JSONBuilder {
   }
 
   @Override
+  public
   JSONObject getJsonFromDirectory() throws NoSuchAlgorithmException, IOException {
     // TODO Auto-generated method stub
     return null;

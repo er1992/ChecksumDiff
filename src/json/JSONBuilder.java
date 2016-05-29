@@ -1,3 +1,4 @@
+package json;
 import java.util.zip.CheckedInputStream;
 import java.util.zip.CRC32;
 import java.io.File;
@@ -8,6 +9,8 @@ import java.security.NoSuchAlgorithmException;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
+
+import pojo.Connection;
 
 public abstract class JSONBuilder {
   protected Connection conn = null;

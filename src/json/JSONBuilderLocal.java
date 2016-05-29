@@ -1,8 +1,11 @@
+package json;
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
 import org.json.simple.JSONObject;
+
+import pojo.Connection;
 
 public class JSONBuilderLocal extends JSONBuilder {
   

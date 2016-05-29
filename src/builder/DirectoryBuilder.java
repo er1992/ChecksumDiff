@@ -1,3 +1,4 @@
+package builder;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -6,6 +7,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.Iterator;
 
 import org.json.simple.JSONObject;
+
+import pojo.Connection;
 
 public class DirectoryBuilder {
   private Connection root;
