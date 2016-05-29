@@ -1,13 +1,17 @@
+package pojo;
+
 import com.sun.istack.internal.Nullable;
 
+import app.App;
+
 public class Connection {
-  String url;
-  String user;
-  Initialiser.InputType type;
-  Integer port = null;
+  public String url;
+  public String user;
+  public App.InputType type;
+  public Integer port = null;
   
   
-  public Connection(String url, @Nullable String user, Initialiser.InputType type, @Nullable Integer port) {
+  public Connection(String url, @Nullable String user, App.InputType type, @Nullable Integer port) {
     super();
     this.url = url;
     this.user = user;
@@ -21,16 +25,16 @@ public class Connection {
     super();
     this.url = "localhost";
     this.user = "root";
-    this.type = Initialiser.InputType.SSH;
+    this.type = App.InputType.SSH;
     this.port = 22;
   }
 
   public boolean valid() {
-    if (type == Initialiser.InputType.SSH) {
+    if (type == App.InputType.SSH) {
       return (this.type != null && this.port != null && this.user != null && this.url != null && !this.url.isEmpty());
-    } else if (type == Initialiser.InputType.LOCAL) {
+    } else if (type == App.InputType.LOCAL) {
       return (this.type != null && this.url != null && !this.url.isEmpty());
-    } else if (type == Initialiser.InputType.JSON) {
+    } else if (type == App.InputType.JSON) {
       // TODO
       return (this.type != null && this.url != null && !this.url.isEmpty());
     } else {

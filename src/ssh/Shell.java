@@ -1,3 +1,4 @@
+package ssh;
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /**
  * This program enables you to connect to sshd server and get the shell prompt.

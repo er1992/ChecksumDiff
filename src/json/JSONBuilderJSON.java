@@ -1,3 +1,4 @@
+package json;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -10,6 +11,8 @@ import org.json.simple.parser.ParseException;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
+import pojo.Connection;
 
 public class JSONBuilderJSON extends JSONBuilder {
 
