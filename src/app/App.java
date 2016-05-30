@@ -11,11 +11,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.Box;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
@@ -50,6 +48,12 @@ public class App {
   }
   
   public static void main(String[] args) {
+    try {
+      UIManager.setLookAndFeel(
+          UIManager.getSystemLookAndFeelClassName());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     App init = new App(args);
     init.run();
   }
@@ -106,6 +110,12 @@ public class App {
         dirBuilder = new DirectoryBuilder(promptJSONSource());
       } else if (connections.get(0).type == InputType.LOCAL && connections.get(1).type == InputType.JSON) {
         log.info("LOCAL vs JSON");
+        JSONDirectoryComparator comparator = new JSONDirectoryComparator(directoryJsons.get(0), directoryJsons.get(1));
+        diff = comparator.compareDirectories();
+        log.info("Building JSON diff");
+        dirBuilder = new DirectoryBuilder(connections.get(0));
+      } else if (connections.get(0).type == InputType.LOCAL && connections.get(1).type == InputType.LOCAL) {
+        log.info("LOCAL vs LOCAL");
         JSONDirectoryComparator comparator = new JSONDirectoryComparator(directoryJsons.get(0), directoryJsons.get(1));
         diff = comparator.compareDirectories();
         log.info("Building JSON diff");

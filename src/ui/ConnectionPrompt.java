@@ -34,16 +34,18 @@ public class ConnectionPrompt extends JFrame {
   private JLabel headerLabel;
   private App app;
   private int stateCounter;
+  private File lastBrowsedDir;
 
   public ConnectionPrompt(App app) throws HeadlessException {
     this.app = app;
     this.stateCounter = 0;
+    lastBrowsedDir = null;
   }
 
   public void initUI() {
     mainFrame = new JFrame("Connection Prompt");
-    mainFrame.setSize(400, 400);
-    mainFrame.setLayout(new GridLayout(6, 1));
+    mainFrame.setSize(400, 200);
+    mainFrame.setLayout(new GridLayout(4, 1));
     mainFrame.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent windowEvent) {
         System.exit(0);
@@ -61,16 +63,19 @@ public class ConnectionPrompt extends JFrame {
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public void generateConnectionPromptRow(String processButtonText) {
-    JButton processButton = new JButton(processButtonText);
-    JButton fileChooserButton = new JButton("Select a Folder");
-    JPanel controlPanel = new JPanel();
+//    JButton processButton = new JButton(processButtonText);
+    final JButton fileChooserButton = new JButton("Select a Folder");
+    JPanel connectionPanel = new JPanel();
+//    JPanel processPanel = new JPanel();
     final DefaultComboBoxModel connectionNames = new DefaultComboBoxModel();
     final JComboBox connectionsCombo = new JComboBox(connectionNames);
     JScrollPane connectionsListScrollPane = new JScrollPane(connectionsCombo);
     final JFileChooser fc = new JFileChooser();
-    fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
     
-    controlPanel.setLayout(new FlowLayout());
+    fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+//    processPanel.add(processButton);
+    
+    connectionPanel.setLayout(new FlowLayout());
     
     connectionNames.addElement("LOCAL");
     connectionNames.addElement("JSON");
@@ -84,9 +89,11 @@ public class ConnectionPrompt extends JFrame {
         if (selectedText.equalsIgnoreCase("LOCAL") ) {
           fileChooserButton.setText("Select a Folder");
           fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+          fileChooserButton.setEnabled(true);
         } else if (selectedText.equalsIgnoreCase("JSON")) {
           fileChooserButton.setText("Select a File");
           fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          fileChooserButton.setEnabled(true);
         } else if (selectedText.equalsIgnoreCase("SSH")) {
           fileChooserButton.setText("N/A");
           fileChooserButton.setEnabled(false);
@@ -95,26 +102,37 @@ public class ConnectionPrompt extends JFrame {
       }
     });
 
-    processButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-      }
-    });
+//    processButton.addActionListener(new ActionListener() {
+//      public void actionPerformed(ActionEvent e) {
+//        ((JButton) e.getSource()).setEnabled(false);
+//      }
+//    });
     
-    controlPanel.add(connectionsListScrollPane);
+    connectionPanel.add(connectionsListScrollPane);
     fileChooserButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        if (lastBrowsedDir != null) {
+          fc.setCurrentDirectory(lastBrowsedDir);
+        }
+        File selectedFile = openFileChooser(fc);
+        if (selectedFile == null) {
+          return;
+        }
+        lastBrowsedDir = selectedFile.getParentFile();
         stateCounter += 1;
-        buildConnection(openFileChooser(fc), null, connectionsCombo.getItemAt(connectionsCombo.getSelectedIndex()).toString(), null);
+        ( (JButton) e.getSource()).setEnabled(false);
+        buildConnection(selectedFile, null, connectionsCombo.getItemAt(connectionsCombo.getSelectedIndex()).toString(), null);
         if (stateCounter == 2) {
           setHeaderLabel("Building the directory");
           app.buildDir();
+          setHeaderLabel("Deploy folder has been created");
         }
       }
     });
     
-    controlPanel.add(fileChooserButton);
-    mainFrame.add(controlPanel);
-    mainFrame.add(processButton);
+    connectionPanel.add(fileChooserButton);
+    mainFrame.add(connectionPanel);
+//    mainFrame.add(processPanel);
   }
 
   private void buildConnection(File file, String user, String type, Integer port) {
