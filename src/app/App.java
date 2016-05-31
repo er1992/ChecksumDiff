@@ -13,8 +13,8 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -37,7 +37,7 @@ import ui.ConnectionPrompt;
 
 public class App {
   
-  static Logger log = Logger.getLogger(App.class.getName());
+  public static Logger log = Logger.getLogger(App.class.getName());
   private String[] args;
   
   List<Connection> connections;
@@ -48,6 +48,7 @@ public class App {
   }
   
   public static void main(String[] args) {
+    BasicConfigurator.configure();
     try {
       UIManager.setLookAndFeel(
           UIManager.getSystemLookAndFeelClassName());
@@ -72,9 +73,9 @@ public class App {
       connectionUI.initUI();
     } else {
       log.info("Input from command line argument");
-      CommandLineHandler cmHandler = new CommandLineHandler(this);
+      CommandLineHandler cmHandler = new CommandLineHandler(this, Arrays.asList(args));
       try {
-        cmHandler.getConnectionsFromArgs(Arrays.asList(args));
+        cmHandler.getConnectionsFromArgs();
       } catch (JsonSyntaxException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();

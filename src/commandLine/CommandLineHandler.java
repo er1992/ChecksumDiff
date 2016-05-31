@@ -18,12 +18,20 @@ import pojo.Connection;
 public class CommandLineHandler {
 
   App app;
+  List<String> args;
   
-  public CommandLineHandler(App app) {
+  public CommandLineHandler(App app, List<String> args) {
+    this.args = args;
+    if (args.get(0).equalsIgnoreCase("-h")) {
+      App.log.info("Usage Example:");
+      App.log.info("-t1 [Local, Json, SSH] -u1 [URL/Path to source folder/file] -t2 [Local, Json, SSH] -u2 [URL/Path to target folder/file] ");
+      // TODO Throw an excepion and let App deal with it
+      System.exit(0);
+    }
     this.app = app;
   }
   
-  public void getConnectionsFromArgs(List<String> args) throws JsonSyntaxException, JsonIOException, FileNotFoundException, UnsupportedEncodingException, IOException, ParseException {
+  public void getConnectionsFromArgs() throws JsonSyntaxException, JsonIOException, FileNotFoundException, UnsupportedEncodingException, IOException, ParseException {
     List<Connection> connections = new ArrayList<Connection>();
     
     for (int i = 1; i < 3; i++) {

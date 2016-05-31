@@ -1,6 +1,8 @@
 package ui;
 
+import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
@@ -29,6 +31,10 @@ import pojo.Connection;
 
 public class ConnectionPrompt extends JFrame {
 
+  private enum StatusType {
+    INSTRUCTION, INFO
+  }
+  
   private static final long serialVersionUID = 3932350688147644588L;
   private JFrame mainFrame;
   private JLabel headerLabel;
@@ -53,7 +59,9 @@ public class ConnectionPrompt extends JFrame {
     });
 
     headerLabel = new JLabel("", JLabel.CENTER);
-    setHeaderLabel("Choose the source");
+    headerLabel.setFont(new Font("Serif", Font.BOLD, 15));
+
+    setHeaderLabel("Choose the source", StatusType.INSTRUCTION);
 
     mainFrame.add(headerLabel);
     generateConnectionPromptRow("Process source connection and proceed");
@@ -121,6 +129,9 @@ public class ConnectionPrompt extends JFrame {
         lastBrowsedDir = selectedFile.getParentFile();
         stateCounter += 1;
         ( (JButton) e.getSource()).setEnabled(false);
+        ( (JButton) e.getSource()).paintImmediately( ((JButton) e.getSource()).getVisibleRect() );
+        connectionsCombo.setEnabled(false);
+        connectionsCombo.paintImmediately(connectionsCombo.getVisibleRect());
         buildConnection(selectedFile, null, connectionsCombo.getItemAt(connectionsCombo.getSelectedIndex()).toString(), null);
         if (stateCounter == 2) {
           setHeaderLabel("Building the directory");
@@ -154,12 +165,21 @@ public class ConnectionPrompt extends JFrame {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    setHeaderLabel("Choose the target");
+    setHeaderLabel("Choose the target", StatusType.INSTRUCTION);
   }
 
-  public void setHeaderLabel(String headerLabel) {
-    this.headerLabel.setText(headerLabel);
+  public void setHeaderLabel(String headerLabelText, StatusType status) {
+    if (status == StatusType.INFO) {
+      headerLabel.setForeground(Color.BLACK);
+    } else if (status == StatusType.INSTRUCTION) {
+      headerLabel.setForeground(Color.RED);
+    }
+    this.headerLabel.setText(headerLabelText);
     this.headerLabel.paintImmediately(this.headerLabel.getVisibleRect());
+  }
+  
+  public void setHeaderLabel(String headerLabelText) {
+    this.setHeaderLabel(headerLabelText, StatusType.INFO);
   }
   
   private File openFileChooser(final JFileChooser fc) {
