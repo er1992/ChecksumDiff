@@ -200,6 +200,10 @@ public class App {
     fileExemptions.add(filePath);
   }
   
+  public void removeFileExemption(int index) {
+    fileExemptions.remove(index);
+  }
+  
   public Connection promptJSONSource() {
     return new Connection(JOptionPane.showInputDialog(null, "Enter the Source Folder to copy from"), null, null, null);
   }

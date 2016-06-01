@@ -6,17 +6,21 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
@@ -26,7 +30,6 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
 import app.App;
-import javafx.stage.FileChooser;
 import pojo.Connection;
 
 public class ConnectionPrompt extends JFrame {
@@ -50,8 +53,10 @@ public class ConnectionPrompt extends JFrame {
 
   public void initUI() {
     mainFrame = new JFrame("Connection Prompt");
+    final DefaultListModel<String> model = new DefaultListModel<String>();
+    final JList<String> fileExemptionsList = new JList<String>(model);
     mainFrame.setSize(400, 200);
-    mainFrame.setLayout(new GridLayout(4, 1));
+    mainFrame.setLayout(new GridLayout(5, 1));
     mainFrame.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent windowEvent) {
         System.exit(0);
@@ -83,14 +88,27 @@ public class ConnectionPrompt extends JFrame {
         lastBrowsedDir = selectedFile.getParentFile();
         try {
           app.addFileExemption(selectedFile.getCanonicalPath());
+          model.addElement(selectedFile.getCanonicalPath());
         } catch (IOException e1) {
           e1.printStackTrace();
         }
       }
     });
     
+    fileExemptionsList.addMouseListener(new MouseAdapter() {
+      @Override
+      public void mouseClicked(MouseEvent e) {
+        if (e.getClickCount() >= 2) {
+          int index = fileExemptionsList.locationToIndex(e.getPoint());
+          model.remove(index);
+          app.removeFileExemption(index);
+        }
+      }
+    });
+    
     mainFrame.setVisible(true);
     mainFrame.add(fileExemptionChooserButton);
+    mainFrame.add(fileExemptionsList);
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -156,7 +174,8 @@ public class ConnectionPrompt extends JFrame {
       }
     });
     connectionPanel.add(fileChooserButton);
-        
+    
+    
     mainFrame.add(connectionPanel);
   }
 
