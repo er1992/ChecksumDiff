@@ -124,6 +124,7 @@ public class App {
       }
       try {
         log.info("Building direcotry from JSON diff");
+        writeDiffToJSONFile(diff, connections.get(0));
         dirBuilder.buildDirectoryFromJson(diff);
       } catch (IOException e) {
         // TODO Auto-generated catch block
@@ -149,6 +150,13 @@ public class App {
       return;
     File file = new File(conn.url);
     PrintWriter writer = new PrintWriter(file.getParentFile().getCanonicalPath() + "/" + file.getName() + ".json", "UTF-8");
+    writer.print(jsonObj);
+    writer.close();
+  }
+  
+  private void writeDiffToJSONFile(JSONObject jsonObj, Connection conn) throws FileNotFoundException, UnsupportedEncodingException, IOException {
+    File file = new File(conn.url);
+    PrintWriter writer = new PrintWriter(file.getParentFile().getCanonicalPath() + "/diff.json", "UTF-8");
     writer.print(jsonObj);
     writer.close();
   }
