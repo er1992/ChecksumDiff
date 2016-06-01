@@ -1,5 +1,7 @@
 package json;
 import java.util.zip.CheckedInputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.CRC32;
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,9 +16,11 @@ import pojo.Connection;
 
 public abstract class JSONBuilder {
   protected Connection conn = null;
+  protected List<String> fileExemptions;
   
   public JSONBuilder(Connection conn) {
     this.conn = conn;
+    this.fileExemptions = new ArrayList<String>();
   }
   
   abstract JSONObject getJsonFromDirectory() throws NoSuchAlgorithmException, IOException, FileNotFoundException, ParseException;
@@ -33,6 +37,18 @@ public abstract class JSONBuilder {
     
     return checksum;
 
+  }
+    
+  public List<String> getFileExemptions() {
+    return fileExemptions;
+  }
+
+  public void setFileExemptions(List<String> fileExemptions) {
+    this.fileExemptions = fileExemptions;
+  }
+  
+  public void addFileExmeption(String filePath) {
+    this.fileExemptions.add(filePath);
   }
   
 }

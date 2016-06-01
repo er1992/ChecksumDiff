@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -27,6 +26,7 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
 import app.App;
+import javafx.stage.FileChooser;
 import pojo.Connection;
 
 public class ConnectionPrompt extends JFrame {
@@ -42,7 +42,7 @@ public class ConnectionPrompt extends JFrame {
   private int stateCounter;
   private File lastBrowsedDir;
 
-  public ConnectionPrompt(App app) throws HeadlessException {
+  public ConnectionPrompt(App app) {
     this.app = app;
     this.stateCounter = 0;
     lastBrowsedDir = null;
@@ -66,22 +66,43 @@ public class ConnectionPrompt extends JFrame {
     mainFrame.add(headerLabel);
     generateConnectionPromptRow("Process source connection and proceed");
     generateConnectionPromptRow("Process target connection and proceed");
+    
+    JButton fileExemptionChooserButton = new JButton("Add an exempted folder");
+    fileExemptionChooserButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        final JFileChooser fc = new JFileChooser();
+        fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+        if (lastBrowsedDir != null) {
+          fc.setCurrentDirectory(lastBrowsedDir);
+        }
+        File selectedFile = openFileChooser(fc);
+        if (selectedFile == null) {
+          return;
+        }
+        lastBrowsedDir = selectedFile.getParentFile();
+        try {
+          app.addFileExemption(selectedFile.getCanonicalPath());
+        } catch (IOException e1) {
+          e1.printStackTrace();
+        }
+      }
+    });
+    
     mainFrame.setVisible(true);
+    mainFrame.add(fileExemptionChooserButton);
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public void generateConnectionPromptRow(String processButtonText) {
-//    JButton processButton = new JButton(processButtonText);
     final JButton fileChooserButton = new JButton("Select a Folder");
     JPanel connectionPanel = new JPanel();
-//    JPanel processPanel = new JPanel();
     final DefaultComboBoxModel connectionNames = new DefaultComboBoxModel();
     final JComboBox connectionsCombo = new JComboBox(connectionNames);
     JScrollPane connectionsListScrollPane = new JScrollPane(connectionsCombo);
     final JFileChooser fc = new JFileChooser();
     
     fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-//    processPanel.add(processButton);
     
     connectionPanel.setLayout(new FlowLayout());
     
@@ -109,14 +130,8 @@ public class ConnectionPrompt extends JFrame {
         }
       }
     });
-
-//    processButton.addActionListener(new ActionListener() {
-//      public void actionPerformed(ActionEvent e) {
-//        ((JButton) e.getSource()).setEnabled(false);
-//      }
-//    });
-    
     connectionPanel.add(connectionsListScrollPane);
+    
     fileChooserButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         if (lastBrowsedDir != null) {
@@ -140,10 +155,9 @@ public class ConnectionPrompt extends JFrame {
         }
       }
     });
-    
     connectionPanel.add(fileChooserButton);
+        
     mainFrame.add(connectionPanel);
-//    mainFrame.add(processPanel);
   }
 
   private void buildConnection(File file, String user, String type, Integer port) {

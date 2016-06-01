@@ -42,6 +42,7 @@ public class App {
   
   List<Connection> connections;
   List<JSONObject> directoryJsons;
+  List<String> fileExemptions;
   
   public enum InputType {
     SSH, LOCAL, JSON
@@ -63,6 +64,7 @@ public class App {
     this.args = args;
     connections = new ArrayList<>();
     directoryJsons = new ArrayList<>();
+    fileExemptions = new ArrayList<>();
   }
   
   public void run() {
@@ -166,6 +168,7 @@ public class App {
     if (conn.type == InputType.SSH) {
       JSONBuilderSSH sshBuilder = new JSONBuilderSSH(conn);
       try {
+        sshBuilder.setFileExemptions(fileExemptions);
         dirJson = sshBuilder.getJsonFromDirectory();
       } catch (NoSuchAlgorithmException | IOException e) {
         // TODO
@@ -174,6 +177,7 @@ public class App {
     } else if (conn.type == InputType.LOCAL) {
       JSONBuilderLocal localBuilder = new JSONBuilderLocal(conn);
       try {
+        localBuilder.setFileExemptions(fileExemptions);
         dirJson = localBuilder.getJsonFromDirectory();
       } catch (NoSuchAlgorithmException | IOException e) {
         // TODO
@@ -192,7 +196,11 @@ public class App {
     return dirJson;
   }
   
-  public static Connection promptJSONSource() {
+  public void addFileExemption(String filePath) {
+    fileExemptions.add(filePath);
+  }
+  
+  public Connection promptJSONSource() {
     return new Connection(JOptionPane.showInputDialog(null, "Enter the Source Folder to copy from"), null, null, null);
   }
   

@@ -2,6 +2,8 @@ package json;
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.simple.JSONObject;
 
@@ -25,12 +27,14 @@ public class JSONBuilderLocal extends JSONBuilder {
   private JSONObject walkFolder(File[] files) throws NoSuchAlgorithmException, IOException {
     JSONObject folderJson = new JSONObject();
     for (File file : files) {
-      if (!file.canRead())
-        continue;
-      if (file.isDirectory()) {
-        folderJson.put(file.getName(), walkFolder(file.listFiles()));
-      } else {
-        folderJson.put(file.getName(), getFileChecksum(file).toString());
+      if (!fileExemptions.contains(file.getCanonicalPath())) {
+        if (!file.canRead())
+          continue;
+        if (file.isDirectory()) {
+          folderJson.put(file.getName(), walkFolder(file.listFiles()));
+        } else {
+          folderJson.put(file.getName(), getFileChecksum(file).toString());
+        }
       }
     }
     return folderJson;
